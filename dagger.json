@@ -1,5 +1,5 @@
 {
-  "name": "setup-php",
+  "name": "php",
   "engineVersion": "v0.15.3",
   "sdk": "go",
   "source": "."
