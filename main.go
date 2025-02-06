@@ -1,4 +1,4 @@
-// A generated module for DaggerSetupPhp functions
+// A generated module for SetupPhp functions
 //
 // This module has been generated via dagger init and serves as a reference to
 // basic module structure as you get started with Dagger.
@@ -19,7 +19,7 @@ import (
 	"fmt"
 )
 
-type DaggerSetupPhp struct {
+type SetupPhp struct {
 	// The PHP extensions to install
 	Extensions []string
 
@@ -34,15 +34,15 @@ func New(
 	// +optional
 	// +default=["bcmath","cli","common","curl","intl","mbstring","mysql","opcache","readline","xml","zip"]
 	extensions []string,
-) *DaggerSetupPhp {
-	return &DaggerSetupPhp{
+) *SetupPhp {
+	return &SetupPhp{
 		Version:    version,
 		Extensions: extensions,
 	}
 }
 
 // Create a container with PHP and the specified extensions installed
-func (m *DaggerSetupPhp) Build() *dagger.Container {
+func (m *SetupPhp) Build() *dagger.Container {
 	var ext []string
 	for _, e := range m.Extensions {
 		ext = append(ext, fmt.Sprintf("php%s-%s", m.Version, e))
@@ -59,7 +59,7 @@ func (m *DaggerSetupPhp) Build() *dagger.Container {
 }
 
 // Run a PHP command with the specified arguments
-func (m *DaggerSetupPhp) Run(
+func (m *SetupPhp) Run(
 	// The arguments to pass to the PHP command
 	args []string,
 ) *dagger.Container {

@@ -1,5 +1,6 @@
 {
-  "name": "dagger-setup-php",
+  "name": "setup-php",
   "engineVersion": "v0.15.3",
-  "sdk": "go"
+  "sdk": "go",
+  "source": "."
 }
