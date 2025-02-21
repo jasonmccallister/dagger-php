@@ -59,7 +59,7 @@ func (m *Php) Setup() *dagger.Container {
 		From("ubuntu:"+m.UbuntuVersion).
 		WithEnvVariable("DEBIAN_FRONTEND", "noninteractive").
 		WithExec([]string{"apt", "update", "-y"}).
-		WithExec([]string{"apt", "install", "-y", "-q", "software-properties-common"}).
+		WithExec([]string{"apt", "install", "-y", "-q", "software-properties-common", "git"}).
 		WithExec([]string{"add-apt-repository", "ppa:ondrej/php"}).
 		WithExec([]string{"apt", "update", "-y"}).
 		WithExec(append([]string{"apt", "install", "-y", "php" + m.Version}, ext...)).
