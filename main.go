@@ -1,19 +1,20 @@
 package main
 
 import (
-	"context"
 	"dagger/dagger-setup-php/internal/dagger"
 	"fmt"
+	"slices"
+)
+
+var (
+	defaultExtensions = []string{"bcmath", "cli", "common", "curl", "intl", "mbstring", "mysql", "opcache", "readline", "sqlite3", "xml", "zip"}
 )
 
 type Php struct {
-	EnableXdebug bool
-
-	// The PHP extensions to install
-	Extensions []string
-
-	// The version of PHP to install
-	Version string
+	EnableXdebug  bool     // +private
+	Extensions    []string // +private
+	Version       string   // +private
+	UbuntuVersion string   // +private
 }
 
 func New(
@@ -21,19 +22,25 @@ func New(
 	// +optional
 	// +default="8.4"
 	version string,
-	// The PHP extensions to install
+	// Additional PHP extensions to install
 	// +optional
-	// +default=["bcmath","cli","common","curl","intl","mbstring","mysql","opcache","readline","xml","zip"]
 	extensions []string,
 	// Enable Xdebug for the PHP container
 	// +optional
 	// +default=false
 	enableXdebug bool,
+	// The version of Ubuntu to use
+	// +optional
+	// +default="24.04"
+	ubuntuVersion string,
 ) *Php {
 	return &Php{
 		EnableXdebug: enableXdebug,
 		Version:      version,
-		Extensions:   extensions,
+		Extensions: slices.Compact(
+			append(defaultExtensions, extensions...),
+		),
+		UbuntuVersion: ubuntuVersion,
 	}
 }
 
@@ -49,7 +56,7 @@ func (m *Php) Setup() *dagger.Container {
 	}
 
 	c := dag.Container().
-		From("ubuntu:24.04").
+		From("ubuntu:"+m.UbuntuVersion).
 		WithEnvVariable("DEBIAN_FRONTEND", "noninteractive").
 		WithExec([]string{"apt", "update", "-y"}).
 		WithExec([]string{"apt", "install", "-y", "-q", "software-properties-common"}).
@@ -57,6 +64,7 @@ func (m *Php) Setup() *dagger.Container {
 		WithExec([]string{"apt", "update", "-y"}).
 		WithExec(append([]string{"apt", "install", "-y", "php" + m.Version}, ext...)).
 		WithWorkdir("/app").
+		WithDefaultTerminalCmd([]string{"bash"}).
 		WithEntrypoint([]string{"php"})
 
 	if m.EnableXdebug {
@@ -64,13 +72,4 @@ func (m *Php) Setup() *dagger.Container {
 	}
 
 	return c
-}
-
-// Run a PHP command with the specified arguments
-func (m *Php) Run(
-	ctx context.Context,
-	// The arguments to pass to the PHP command
-	args []string,
-) (string, error) {
-	return m.Setup().WithExec(append([]string{"php"}, args...)).Stdout(ctx)
 }
