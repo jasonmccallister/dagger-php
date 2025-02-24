@@ -11,10 +11,11 @@ var (
 )
 
 type Php struct {
-	EnableXdebug  bool     // +private
-	Extensions    []string // +private
-	Version       string   // +private
-	UbuntuVersion string   // +private
+	EnableXdebug  bool              // +private
+	Extensions    []string          // +private
+	Version       string            // +private
+	UbuntuVersion string            // +private
+	Source        *dagger.Directory // +private
 }
 
 func New(
@@ -33,6 +34,9 @@ func New(
 	// +optional
 	// +default="24.04"
 	ubuntuVersion string,
+	// The directory that contains your PHP project.
+	// +optional
+	source *dagger.Directory,
 ) *Php {
 	return &Php{
 		EnableXdebug: enableXdebug,
@@ -41,6 +45,7 @@ func New(
 			append(defaultExtensions, extensions...),
 		),
 		UbuntuVersion: ubuntuVersion,
+		Source:        source,
 	}
 }
 
@@ -66,6 +71,10 @@ func (m *Php) Setup() *dagger.Container {
 		WithWorkdir("/app").
 		WithDefaultTerminalCmd([]string{"bash"}).
 		WithEntrypoint([]string{"php"})
+
+	if m.Source != nil {
+		c = c.WithMountedDirectory("/app", m.Source)
+	}
 
 	if m.EnableXdebug {
 		c = c.WithEnvVariable("XDEBUG_MODE", "coverage")
